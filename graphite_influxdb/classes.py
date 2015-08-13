@@ -93,7 +93,7 @@ class InfluxdbFinder(object):
     __fetch_multi__ = 'influxdb'
     __slots__ = ('client', 'schemas', 'config', 'statsd_client')
 
-    def __init__(self, config=None):
+    def __init__(self, config):
         config = normalize_config(config)
         self.config = config
         self.client = InfluxDBClient(config.get('host', 'localhost'),
@@ -102,7 +102,6 @@ class InfluxdbFinder(object):
                                      config.get('passw', 'root'),
                                      config['db'],
                                      config.get('ssl', 'false'),)
-        self.schemas = [(re.compile(patt), step) for (patt, step) in config['schema']]
         try:
             self.statsd_client = statsd.StatsClient(config['statsd'].get('host'),
                                                     config['statsd'].get('port', 8125)) \

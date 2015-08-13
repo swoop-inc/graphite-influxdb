@@ -1,3 +1,5 @@
+"""Utilities package for graphite-influxdb"""
+
 import datetime
 import sys
 
@@ -33,11 +35,11 @@ def calculate_interval(start_time, end_time):
     for delta in sorted(deltas.keys()):
         if time_delta <= delta:
             return deltas[delta]
-    # 1 day default, or if time range > 4 year
+    # 1 day default, or if time range > 4 years
     return 86400
 
 class NullStatsd(object):
-    """Fake StatsClient compatible class to use when statsd is not configured"""
+    """Fake :mod:`statsd.StatsClient` compatible class to use when statsd is not configured"""
 
     def __enter__(self):
         return self
@@ -58,6 +60,7 @@ class NullStatsd(object):
         pass
 
 def normalize_config(config):
+    """Check required config values and return normalised config dict"""
     cfg = config.get('influxdb', None)
     ret = {}
     if not cfg:
@@ -72,7 +75,6 @@ def normalize_config(config):
     ret['db'] = cfg.get('db', 'graphite')
     ssl = cfg.get('ssl', False)
     ret['ssl'] = (ssl == 'true')
-    ret['schema'] = cfg.get('schema', [])
     ret['log_file'] = cfg.get('log_file', None)
     ret['log_level'] = cfg.get('log_level', 'info')
     cfg = config.get('es', {})
@@ -81,7 +83,7 @@ def normalize_config(config):
     return ret
 
 def read_influxdb_values(influxdb_data):
-    """Return generator for values from InfluxDB data"""
+    """Return generator for values (datapoints) from InfluxDB data"""
     _data = {}
     for key in influxdb_data.keys():
         _data[key[0]] = (d['value'] for d in influxdb_data.get_points(key[0]))
